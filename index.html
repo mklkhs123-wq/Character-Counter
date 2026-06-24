@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Character Counter – TechPatraa</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: linear-gradient(135deg, #141e30, #243b55);
+    --card: rgba(255,255,255,0.06);
+    --card-border: rgba(255,255,255,0.1);
+    --green: #1D9E75;
+    --green-light: #25c48f;
+    --green-dark: #0F6E56;
+    --text: #f0f0f0;
+    --muted: #9aa5b4;
+    --accent: rgba(29,158,117,0.15);
+    --red: #ff6b6b;
+    --yellow: #ffd166;
+    --radius: 14px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 20px 16px 60px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .header .badge {
+    display: inline-block;
+    background: var(--accent);
+    border: 1px solid var(--green-dark);
+    color: var(--green-light);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 700;
+    background: linear-gradient(90deg, #fff 40%, var(--green-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .header p { color: var(--muted); font-size: 13px; }
+
+  /* AD */
+  .ad-top { max-width: 360px; margin: 0 auto 20px; text-align: center; }
+  .ad-bottom { max-width: 700px; margin: 24px auto 0; text-align: center; }
+
+  /* PLATFORM TABS */
+  .platform-tabs {
+    display: flex;
+    gap: 6px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 5px;
+    max-width: 700px;
+    margin: 0 auto 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .platform-tabs::-webkit-scrollbar { display: none; }
+  .ptab {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+  }
+  .ptab.active { background: var(--green); color: #fff; }
+
+  /* MAIN */
+  .main { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--green-light);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* TEXTAREA */
+  .textarea-wrap { position: relative; }
+  textarea {
+    width: 100%;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 14px;
+    outline: none;
+    resize: vertical;
+    min-height: 160px;
+    line-height: 1.6;
+    transition: border 0.2s;
+  }
+  textarea:focus { border-color: var(--green); }
+  textarea::placeholder { color: var(--muted); }
+
+  .textarea-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-sm {
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: 1px solid var(--card-border);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-sm:hover { border-color: var(--green); color: var(--green-light); background: var(--accent); }
+  .btn-sm.danger:hover { border-color: var(--red); color: var(--red); background: rgba(255,107,107,0.1); }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+  .stat-box {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .stat-box:hover { border-color: var(--green-dark); }
+  .stat-val {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-light);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  /* PLATFORM LIMITS */
+  .limits-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .limit-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .limit-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+  .limit-info { flex: 1; min-width: 0; }
+  .limit-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .limit-name span { color: var(--muted); font-weight: 400; }
+  .limit-bar-wrap {
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .limit-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease, background 0.4s;
+  }
+  .limit-status {
+    font-size: 11px;
+    margin-top: 3px;
+  }
+
+  /* ACTIVE PLATFORM DETAIL */
+  .platform-detail {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .platform-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .platform-detail-icon { font-size: 24px; }
+  .platform-detail-name { font-size: 15px; font-weight: 600; }
+  .platform-detail-sub { font-size: 11px; color: var(--muted); }
+
+  .limit-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+  }
+  .limit-type-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .limit-type-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+  .limit-type-val { font-size: 18px; font-weight: 700; color: var(--green-light); }
+  .limit-type-used { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .limit-type-used.warn { color: var(--yellow); }
+  .limit-type-used.over { color: var(--red); }
+
+  /* KEYWORD DENSITY */
+  .keyword-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .keyword-chip {
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+    background: rgba(255,255,255,0.04);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .keyword-chip .kw-word { color: var(--text); }
+  .keyword-chip .kw-count {
+    background: var(--green-dark);
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  /* READING TIME */
+  .reading-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .reading-box {
+    flex: 1;
+    min-width: 120px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .reading-val { font-size: 22px; font-weight: 700; color: var(--green-light); }
+  .reading-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* FAQ */
+  .faq-item { border-bottom: 1px solid var(--card-border); }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    gap: 10px;
+    transition: color 0.2s;
+  }
+  .faq-q:hover { color: var(--green-light); }
+  .faq-arrow { font-size: 11px; color: var(--muted); transition: transform 0.25s, color 0.2s; flex-shrink: 0; }
+  .faq-a {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s;
+    padding: 0 4px;
+  }
+  .faq-a.open { max-height: 200px; padding: 0 4px 13px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--green);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- TOP AD -->
+<div class="ad-top">
+  <script type="text/javascript">
+    atOptions = { 'key': '40481fbfeb3ccbe3f4d81eba78ba36e8', 'format': 'iframe', 'height': 50, 'width': 320, 'params': {} };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/40481fbfeb3ccbe3f4d81eba78ba36e8/invoke.js"></script>
+</div>
+
+<div class="header">
+  <div class="badge">📊 Free Tool</div>
+  <h1>Character Counter</h1>
+  <p>Count characters, words & check limits for Twitter, Instagram, YouTube and more</p>
+</div>
+
+<!-- PLATFORM TABS -->
+<div class="platform-tabs">
+  <button class="ptab active" onclick="setPlatform('all')">📊 All Stats</button>
+  <button class="ptab" onclick="setPlatform('twitter')">𝕏 Twitter/X</button>
+  <button class="ptab" onclick="setPlatform('instagram')">📸 Instagram</button>
+  <button class="ptab" onclick="setPlatform('youtube')">▶️ YouTube</button>
+  <button class="ptab" onclick="setPlatform('linkedin')">💼 LinkedIn</button>
+  <button class="ptab" onclick="setPlatform('facebook')">👤 Facebook</button>
+</div>
+
+<div class="main">
+
+  <!-- TEXTAREA -->
+  <div class="card">
+    <div class="card-title">✍️ Type or Paste Your Text</div>
+    <div class="textarea-wrap">
+      <textarea id="main-input" placeholder="Start typing or paste your text here... Character count will update instantly." oninput="analyzeText()"></textarea>
+    </div>
+    <div class="textarea-actions">
+      <button class="btn-sm" onclick="copyText()">📋 Copy Text</button>
+      <button class="btn-sm" onclick="pasteText()">📌 Paste</button>
+      <button class="btn-sm" onclick="removeSpaces()">✂️ Remove Extra Spaces</button>
+      <button class="btn-sm" onclick="toUpper()">AA Upper</button>
+      <button class="btn-sm" onclick="toLower()">aa Lower</button>
+      <button class="btn-sm danger" onclick="clearText()">🗑️ Clear</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="card" id="stats-card">
+    <div class="card-title">📊 Text Statistics</div>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-val" id="s-chars">0</div>
+        <div class="stat-label">Characters</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="s-chars-no-space">0</div>
+        <div class="stat-label">Chars (no space)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="s-words">0</div>
+        <div class="stat-label">Words</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="s-sentences">0</div>
+        <div class="stat-label">Sentences</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="s-paragraphs">0</div>
+        <div class="stat-label">Paragraphs</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="s-lines">0</div>
+        <div class="stat-label">Lines</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="s-read">0s</div>
+        <div class="stat-label">Read Time</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="s-speak">0s</div>
+        <div class="stat-label">Speak Time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLATFORM LIMITS -->
+  <div class="card" id="platform-card">
+    <div class="card-title" id="platform-title">📱 Platform Limits</div>
+
+    <!-- All Platforms View -->
+    <div id="view-all">
+      <div class="limits-grid" id="all-limits"></div>
+    </div>
+
+    <!-- Single Platform View -->
+    <div id="view-single" style="display:none">
+      <div class="platform-detail" id="single-detail"></div>
+    </div>
+  </div>
+
+  <!-- READING TIME -->
+  <div class="card">
+    <div class="card-title">⏱️ Reading & Speaking Time</div>
+    <div class="reading-row">
+      <div class="reading-box">
+        <div class="reading-val" id="rt-slow">0s</div>
+        <div class="reading-label">Slow Reader<br><span style="font-size:10px;color:var(--muted)">~100 wpm</span></div>
+      </div>
+      <div class="reading-box">
+        <div class="reading-val" id="rt-avg">0s</div>
+        <div class="reading-label">Average Reader<br><span style="font-size:10px;color:var(--muted)">~200 wpm</span></div>
+      </div>
+      <div class="reading-box">
+        <div class="reading-val" id="rt-fast">0s</div>
+        <div class="reading-label">Fast Reader<br><span style="font-size:10px;color:var(--muted)">~300 wpm</span></div>
+      </div>
+      <div class="reading-box">
+        <div class="reading-val" id="rt-speak">0s</div>
+        <div class="reading-label">Speaking<br><span style="font-size:10px;color:var(--muted)">~130 wpm</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP WORDS -->
+  <div class="card">
+    <div class="card-title">🔤 Top Words Used</div>
+    <div class="keyword-list" id="keyword-list">
+      <span style="color:var(--muted); font-size:13px">Start typing to see word frequency...</span>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="card">
+    <div class="card-title">❓ Frequently Asked Questions (FAQ)</div>
+    <div id="faq-list"></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM AD -->
+<div class="ad-bottom">
+  <script type="text/javascript">
+    atOptions = { 'key': '40481fbfeb3ccbe3f4d81eba78ba36e8', 'format': 'iframe', 'height': 50, 'width': 320, 'params': {} };
+  </script>
+  <script type="text/javascript" src="//www.highperformanceformat.com/40481fbfeb3ccbe3f4d81eba78ba36e8/invoke.js"></script>
+</div>
+
+<!-- EFFECTIVECPM -->
+<div id="d6326e2bc11513c8d9ebfbc2f5913f5f"></div>
+<script type="text/javascript" src="//effectivecpmnetwork.com/d6326e2bc11513c8d9ebfbc2f5913f5f/invoke.js"></script>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== PLATFORM DATA ====================
+const PLATFORMS = {
+  twitter: {
+    name: 'Twitter / X',
+    icon: '𝕏',
+    color: '#1DA1F2',
+    limits: [
+      { label: 'Tweet', max: 280 },
+      { label: 'Bio', max: 160 },
+      { label: 'Display Name', max: 50 },
+    ]
+  },
+  instagram: {
+    name: 'Instagram',
+    icon: '📸',
+    color: '#E1306C',
+    limits: [
+      { label: 'Caption', max: 2200 },
+      { label: 'Bio', max: 150 },
+      { label: 'Username', max: 30 },
+      { label: 'Comment', max: 2200 },
+    ]
+  },
+  youtube: {
+    name: 'YouTube',
+    icon: '▶️',
+    color: '#FF0000',
+    limits: [
+      { label: 'Title', max: 100 },
+      { label: 'Description', max: 5000 },
+      { label: 'Tags', max: 500 },
+      { label: 'Comment', max: 10000 },
+    ]
+  },
+  linkedin: {
+    name: 'LinkedIn',
+    icon: '💼',
+    color: '#0077B5',
+    limits: [
+      { label: 'Post', max: 3000 },
+      { label: 'Headline', max: 220 },
+      { label: 'Summary', max: 2000 },
+      { label: 'Comment', max: 1250 },
+    ]
+  },
+  facebook: {
+    name: 'Facebook',
+    icon: '👤',
+    color: '#1877F2',
+    limits: [
+      { label: 'Post', max: 63206 },
+      { label: 'Bio', max: 101 },
+      { label: 'Comment', max: 8000 },
+      { label: 'Page Name', max: 75 },
+    ]
+  }
+};
+
+let currentPlatform = 'all';
+let currentChars = 0;
+
+// ==================== ANALYZE ====================
+function analyzeText() {
+  const text = document.getElementById('main-input').value;
+  currentChars = text.length;
+
+  // Basic stats
+  const charsNoSpace = text.replace(/\s/g, '').length;
+  const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+  const sentences = text.trim() === '' ? 0 : (text.match(/[.!?]+/g) || []).length;
+  const paragraphs = text.trim() === '' ? 0 : text.split(/\n\s*\n/).filter(p => p.trim()).length || (text.trim() ? 1 : 0);
+  const lines = text.trim() === '' ? 0 : text.split('\n').filter(l => l.trim()).length;
+
+  document.getElementById('s-chars').textContent = currentChars.toLocaleString();
+  document.getElementById('s-chars-no-space').textContent = charsNoSpace.toLocaleString();
+  document.getElementById('s-words').textContent = words.toLocaleString();
+  document.getElementById('s-sentences').textContent = sentences.toLocaleString();
+  document.getElementById('s-paragraphs').textContent = paragraphs.toLocaleString();
+  document.getElementById('s-lines').textContent = lines.toLocaleString();
+
+  // Reading time
+  const rtSlow = readTime(words, 100);
+  const rtAvg = readTime(words, 200);
+  const rtFast = readTime(words, 300);
+  const rtSpeak = readTime(words, 130);
+
+  document.getElementById('s-read').textContent = rtAvg;
+  document.getElementById('s-speak').textContent = rtSpeak;
+  document.getElementById('rt-slow').textContent = rtSlow;
+  document.getElementById('rt-avg').textContent = rtAvg;
+  document.getElementById('rt-fast').textContent = rtFast;
+  document.getElementById('rt-speak').textContent = rtSpeak;
+
+  // Platform limits
+  updatePlatformLimits();
+
+  // Keywords
+  updateKeywords(text, words);
+}
+
+function readTime(words, wpm) {
+  if (words === 0) return '0s';
+  const secs = Math.ceil((words / wpm) * 60);
+  if (secs < 60) return secs + 's';
+  const m = Math.floor(secs / 60), s = secs % 60;
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+}
+
+// ==================== PLATFORM LIMITS ====================
+function setPlatform(p) {
+  currentPlatform = p;
+  document.querySelectorAll('.ptab').forEach((btn, i) => {
+    btn.classList.toggle('active', ['all','twitter','instagram','youtube','linkedin','facebook'][i] === p);
+  });
+  updatePlatformLimits();
+}
+
+function updatePlatformLimits() {
+  if (currentPlatform === 'all') {
+    document.getElementById('view-all').style.display = 'block';
+    document.getElementById('view-single').style.display = 'none';
+    document.getElementById('platform-title').textContent = '📱 Platform Limits';
+    renderAllLimits();
+  } else {
+    document.getElementById('view-all').style.display = 'none';
+    document.getElementById('view-single').style.display = 'block';
+    renderSinglePlatform(currentPlatform);
+  }
+}
+
+function renderAllLimits() {
+  const container = document.getElementById('all-limits');
+  container.innerHTML = Object.entries(PLATFORMS).map(([key, p]) => {
+    const mainLimit = p.limits[0];
+    const pct = Math.min((currentChars / mainLimit.max) * 100, 100);
+    const remaining = mainLimit.max - currentChars;
+    const barColor = pct >= 100 ? 'var(--red)' : pct >= 80 ? 'var(--yellow)' : 'var(--green)';
+    const statusText = currentChars === 0 ? `${mainLimit.max} chars allowed` :
+      remaining >= 0 ? `${remaining} remaining` : `${Math.abs(remaining)} over limit`;
+    const statusColor = remaining < 0 ? 'var(--red)' : remaining < mainLimit.max * 0.2 ? 'var(--yellow)' : 'var(--green-light)';
+
+    return `
+      <div class="limit-row">
+        <div class="limit-icon">${p.icon}</div>
+        <div class="limit-info">
+          <div class="limit-name">${p.name} <span>${mainLimit.label}: ${mainLimit.max.toLocaleString()}</span></div>
+          <div class="limit-bar-wrap">
+            <div class="limit-bar" style="width:${pct}%; background:${barColor}"></div>
+          </div>
+          <div class="limit-status" style="color:${statusColor}">${statusText}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSinglePlatform(key) {
+  const p = PLATFORMS[key];
+  document.getElementById('platform-title').textContent = `${p.icon} ${p.name} Limits`;
+
+  const detail = document.getElementById('single-detail');
+  detail.innerHTML = `
+    <div class="platform-detail-header">
+      <div class="platform-detail-icon">${p.icon}</div>
+      <div>
+        <div class="platform-detail-name">${p.name}</div>
+        <div class="platform-detail-sub">Current text: ${currentChars.toLocaleString()} characters</div>
+      </div>
+    </div>
+    <div class="limit-types-grid">
+      ${p.limits.map(lim => {
+        const rem = lim.max - currentChars;
+        const pct = Math.min((currentChars / lim.max) * 100, 100);
+        const barColor = pct >= 100 ? 'var(--red)' : pct >= 80 ? 'var(--yellow)' : 'var(--green)';
+        const usedClass = rem < 0 ? 'over' : rem < lim.max * 0.2 ? 'warn' : '';
+        const usedText = currentChars === 0 ? `Max: ${lim.max.toLocaleString()}` :
+          rem >= 0 ? `${rem.toLocaleString()} left of ${lim.max.toLocaleString()}` :
+          `${Math.abs(rem).toLocaleString()} over limit!`;
+        return `
+          <div class="limit-type-box">
+            <div class="limit-type-label">${lim.label}</div>
+            <div class="limit-type-val" style="color:${pct>=100?'var(--red)':pct>=80?'var(--yellow)':'var(--green-light)'}">${lim.max.toLocaleString()}</div>
+            <div class="limit-bar-wrap" style="margin:6px 0">
+              <div class="limit-bar" style="width:${pct}%; background:${barColor}"></div>
+            </div>
+            <div class="limit-type-used ${usedClass}">${usedText}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ==================== KEYWORDS ====================
+function updateKeywords(text, words) {
+  const container = document.getElementById('keyword-list');
+  if (words < 3) {
+    container.innerHTML = '<span style="color:var(--muted); font-size:13px">Type more text to see word frequency...</span>';
+    return;
+  }
+
+  const stopWords = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','is','are','was','were','be','been','have','has','had','do','does','did','will','would','could','should','may','might','it','its','this','that','these','those','i','you','he','she','we','they','my','your','his','her','our','their','me','him','us','them','not','no','so','if','as','by','from','up','out','about','into','than','then','when','where','how','what','which','who','all','any','both','each','few','more','most','other','some','such','can','just','very','also','back','after','use','two','first','well','way','even','new','want','because','any','these','give','most']);
+
+  const freq = {};
+  text.toLowerCase().match(/\b[a-z]{3,}\b/g)?.forEach(w => {
+    if (!stopWords.has(w)) freq[w] = (freq[w] || 0) + 1;
+  });
+
+  const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 15);
+  if (sorted.length === 0) {
+    container.innerHTML = '<span style="color:var(--muted); font-size:13px">No significant words found...</span>';
+    return;
+  }
+
+  container.innerHTML = sorted.map(([word, count]) => `
+    <div class="keyword-chip">
+      <span class="kw-word">${word}</span>
+      <span class="kw-count">${count}</span>
+    </div>
+  `).join('');
+}
+
+// ==================== ACTIONS ====================
+function copyText() {
+  const text = document.getElementById('main-input').value;
+  if (!text) { showToast('Nothing to copy!'); return; }
+  navigator.clipboard.writeText(text).then(() => showToast('✅ Copied!')).catch(() => showToast('Copy failed'));
+}
+
+async function pasteText() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('main-input').value += text;
+    analyzeText();
+    showToast('✅ Pasted!');
+  } catch { showToast('Paste permission denied. Use Ctrl+V'); }
+}
+
+function clearText() {
+  document.getElementById('main-input').value = '';
+  analyzeText();
+  showToast('🗑️ Cleared!');
+}
+
+function removeSpaces() {
+  const el = document.getElementById('main-input');
+  el.value = el.value.replace(/  +/g, ' ').replace(/\n\s*\n\s*\n/g, '\n\n').trim();
+  analyzeText();
+  showToast('✂️ Extra spaces removed!');
+}
+
+function toUpper() {
+  const el = document.getElementById('main-input');
+  el.value = el.value.toUpperCase();
+  analyzeText();
+}
+
+function toLower() {
+  const el = document.getElementById('main-input');
+  el.value = el.value.toLowerCase();
+  analyzeText();
+}
+
+// ==================== FAQ ====================
+const FAQS = [
+  { q: "What is a Character Counter?", a: "A Character Counter is a free online tool that counts the number of characters, words, sentences, paragraphs, and lines in your text. It also shows reading time and platform-specific character limits." },
+  { q: "Why do character limits matter on social media?", a: "Every social media platform has its own character limit. For example, Twitter/X allows only 280 characters per tweet. If you exceed the limit, your post may get cut off or rejected. This tool helps you stay within limits." },
+  { q: "What is the Twitter/X character limit?", a: "Twitter/X allows a maximum of 280 characters per tweet, 160 characters for bio, and 50 characters for display name." },
+  { q: "What is the Instagram character limit?", a: "Instagram allows up to 2,200 characters for captions, 150 characters for bio, and 30 characters for username." },
+  { q: "What is the YouTube character limit?", a: "YouTube allows up to 100 characters for video titles, 5,000 characters for descriptions, and 500 characters for tags." },
+  { q: "What is the LinkedIn character limit?", a: "LinkedIn allows up to 3,000 characters for posts, 220 characters for headline, and 2,000 characters for summary." },
+  { q: "How is reading time calculated?", a: "Reading time is calculated based on the average reading speed. An average reader reads about 200 words per minute (wpm). This tool also shows slow reader (100 wpm), fast reader (300 wpm), and speaking time (130 wpm)." },
+  { q: "What does 'Characters (no space)' mean?", a: "Characters without spaces counts only the actual letters, numbers, and punctuation — it excludes all blank spaces from the total count." },
+  { q: "Is this tool free to use?", a: "Yes, this Character Counter tool is completely free. No signup or login required. Just type or paste your text and get instant results." },
+  { q: "Does it work on mobile?", a: "Yes, this tool is fully mobile-responsive and works smoothly on all smartphones and tablets." }
+];
+
+function initFAQ() {
+  document.getElementById('faq-list').innerHTML = FAQS.map((f, i) => `
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFAQ(${i})">
+        <span>${f.q}</span>
+        <span class="faq-arrow" id="faq-arrow-${i}">▼</span>
+      </div>
+      <div class="faq-a" id="faq-a-${i}">${f.a}</div>
+    </div>
+  `).join('');
+}
+
+function toggleFAQ(i) {
+  const ans = document.getElementById('faq-a-' + i);
+  const arrow = document.getElementById('faq-arrow-' + i);
+  const isOpen = ans.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.faq-arrow').forEach(el => { el.style.transform = ''; el.style.color = ''; });
+  if (!isOpen) {
+    ans.classList.add('open');
+    arrow.style.transform = 'rotate(180deg)';
+    arrow.style.color = 'var(--green-light)';
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// Init
+initFAQ();
+updatePlatformLimits();
+</script>
+</body>
+</html>
